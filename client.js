@@ -9,7 +9,7 @@ var PINNED_CARD_KEY = 'pinned';
 TrelloPowerUp.initialize({
   // Add badge to pinned cards
   'card-badges': function(t, options) {
-    return t.get('card', 'shared', PINNED_CARD_KEY, false)
+    return t.get('card', 'shared', PINNED_CARD_KEY)
       .then(function(isPinned) {
         if (isPinned) {
           return [{
@@ -20,15 +20,15 @@ TrelloPowerUp.initialize({
         }
         return [];
       })
-      .catch(function(error) {
-        console.error('Error loading card badge:', error);
+      .catch(function() {
+        // Silently fail if session not available
         return [];
       });
   },
 
   // Add pin/unpin button to cards
   'card-buttons': function(t, options) {
-    return t.get('card', 'shared', PINNED_CARD_KEY, false)
+    return t.get('card', 'shared', PINNED_CARD_KEY)
       .then(function(isPinned) {
         return [{
           icon: PIN_ICON,
@@ -36,14 +36,13 @@ TrelloPowerUp.initialize({
           callback: function(t) {
             return t.set('card', 'shared', PINNED_CARD_KEY, !isPinned)
               .then(function() {
-                // Refresh the card to show updated badge
                 return t.closePopup();
               });
           }
         }];
       })
-      .catch(function(error) {
-        console.error('Error loading card button:', error);
+      .catch(function() {
+        // Silently fail if session not available
         return [];
       });
   },
