@@ -135,23 +135,6 @@ TrelloPowerUp.initialize({
       url: './settings.html',
       height: 184
     });
-  },
-
-  // Authorization status for REST API
-  'authorization-status': function(t, options) {
-    return t.getRestApi().isAuthorized()
-      .then(function(isAuthorized) {
-        return { authorized: isAuthorized };
-      });
-  },
-
-  // Show authorization popup
-  'show-authorization': function(t, options) {
-    return t.popup({
-      title: 'Authorize Pin Cards',
-      url: './authorize.html',
-      height: 140
-    });
   }
 }, {
   appKey: APP_KEY,
