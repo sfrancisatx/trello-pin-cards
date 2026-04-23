@@ -9,7 +9,7 @@ var PINNED_CARD_KEY = 'pinned';
 TrelloPowerUp.initialize({
   // Add badge to pinned cards
   'card-badges': function(t, options) {
-    return t.get('card', 'shared', PINNED_CARD_KEY)
+    return t.get('card', 'shared', PINNED_CARD_KEY, false)
       .then(function(isPinned) {
         if (isPinned) {
           return [{
