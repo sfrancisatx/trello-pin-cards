@@ -52,16 +52,19 @@ TrelloPowerUp.initialize({
   // Add board button to show all pinned cards
   'board-buttons': function(t, options) {
     console.log('board-buttons called');
-    return [{
-      text: 'Show Pinned Cards',
-      callback: function(t) {
-        return t.popup({
+    var buttons = [{
+      text: '📌 Pinned Cards',
+      callback: function(context) {
+        console.log('board button clicked!');
+        return context.popup({
           title: 'Pinned Cards',
           url: './pinned-cards.html',
           height: 300
         });
       }
     }];
+    console.log('board-buttons returning:', JSON.stringify(buttons.map(function(b) { return { text: b.text, hasCallback: !!b.callback }; })));
+    return buttons;
   },
 
   // Settings to manage the power-up
