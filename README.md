@@ -1,88 +1,96 @@
 # Pin Cards Power-Up
 
-A Trello Power-Up that allows you to pin cards so they remain visible even when board filters are applied.
+A Trello Power-Up that marks cards as "pinned" and automatically syncs a **Pinned** label so you can use Trello's native filter to keep those cards visible.
 
-## Features
+## What It Does
 
-- **Pin/Unpin Cards**: Add a button to each card to toggle pin status
-- **Visual Badge**: Pinned cards display a 📌 badge
-- **Board Overview**: Board button to view all pinned cards at once
-- **Persistent**: Pin state is saved and persists across sessions
+- **Pin/Unpin button on cards** - Adds a 📌 Pin Card / Unpin Card button in the card's Power-Ups menu (🚀 rocket icon at the bottom of the card)
+- **Visual badge** - Pinned cards display a 📌 Pinned badge on the board view
+- **Board overview** - A 📌 Pinned Cards button at the top of the board opens a popup listing all pinned cards (ignores filters)
+- **Automatic "Pinned" label sync** - When you pin a card, a red "Pinned" label is added via the Trello REST API. Unpinning removes it. The label is created on the board automatically the first time it's needed.
+- **Per-user authorization** - Each user authorizes the Power-Up once via the 🔑 Authorize Pin Cards button. Authorization never expires unless manually revoked.
 
-## Installation
+## What It Does NOT Do
 
-### For Development/Testing
+> **Important**: This Power-Up **cannot** force pinned cards to stay visible when Trello's board filter is active. The Trello Power-Up API does not expose any way to override filter behavior.
 
-1. Start a local web server in this directory:
-   ```bash
-   python3 -m http.server 8080
-   ```
+**Workaround**: Use Trello's filter with the **Pinned** label included. Trello filters use OR logic across labels, so:
 
-2. In Trello, go to your board and click "Power-Ups"
+- Filter by `Due this week` only → shows cards due this week (pinned cards still hidden if they don't match)
+- Filter by `Due this week` **AND** `Pinned` label → shows cards due this week **OR** any pinned card
 
-3. Click "Custom Power-Ups" (you may need to enable this in your Trello settings)
-
-4. Click "New Power-Up"
-
-5. Enter the manifest URL:
-   ```
-   http://localhost:8080/manifest.json
-   ```
-
-6. Enable the Power-Up on your board
-
-### For Production
-
-1. Host these files on a public web server (GitHub Pages, Netlify, etc.)
-
-2. Update the manifest URL to point to your hosted location
-
-3. Follow the same steps as above, using your production URL
+So in practice: check the **Pinned** label in your filter alongside whatever else you're filtering by, and pinned cards will stay visible.
 
 ## Usage
 
-> **Important - New Trello UI**: Power-Up buttons are now hidden in the new Trello layout!
-> - **Card buttons**: Click the **🚀 rocket icon** at the bottom of an open card
-> - **Board buttons**: Click the **🚀 rocket icon** at the top right of the board
+### New Trello UI note
+Power-Up buttons live behind the 🚀 rocket icon:
+- **Card buttons** - 🚀 rocket icon at the bottom of an open card
+- **Board buttons** - 🚀 rocket icon at the top right of the board
 
-### Pin a Card
+### First-time setup (per user)
 
-1. Open any card
-2. Click the 🚀 rocket icon at the bottom of the card to open the Power-Ups menu
-3. Click "📌 Pin Card"
-4. The card will now show a 📌 badge on the board view
+1. Open any card → click 🚀 → click **🔑 Authorize Pin Cards**
+2. Click **Authorize** in the popup → approve in the Trello auth dialog
+3. Done. The authorize button will no longer appear.
 
-### Unpin a Card
+### Pin a card
 
-1. Open a pinned card
-2. Click the "Unpin Card" button
-3. The pin badge will be removed
+1. Open a card → click 🚀 → click **📌 Pin Card**
+2. The card gets a 📌 Pinned badge and a red "Pinned" label
 
-### View All Pinned Cards
+### Unpin a card
 
-1. Click the 📌 "Show Pinned Cards" button in the board header
-2. A popup will show all pinned cards
-3. Click any card in the list to open it
+1. Open a pinned card → click 🚀 → click **📌 Unpin Card**
+2. Badge and label are removed
+
+### View all pinned cards
+
+1. Click 🚀 at the top right of the board → click **📌 Pinned Cards**
+2. Popup lists all currently-pinned cards, regardless of any active filter
+3. Click a card in the list to open it
+
+### Filter to include pinned cards
+
+1. Open Trello's **Filter** panel
+2. In the Labels section, check **Pinned**
+3. Combine with any other filter criteria — pinned cards will remain visible alongside matching cards
 
 ## How It Works
 
-The Power-Up uses Trello's plugin data storage to save the pin state for each card. This data is:
-- Stored per-card
-- Shared across all board members
-- Persistent across sessions
+- Pin state is stored per-card via Trello's Power-Up plugin data (shared scope)
+- Labels are managed via the Trello REST API using a per-user OAuth token obtained through `t.getRestApi().authorize()`
+- The "Pinned" label is auto-created on the board (red, name "Pinned") the first time it's needed
 
-**Note**: While this Power-Up marks cards as "pinned", Trello's native filtering system will still hide cards based on filter criteria. The pin badge and board button help you quickly identify and access pinned cards, but they won't override Trello's built-in filters.
+## Required Capabilities
+
+Enabled in the Trello Power-Up admin:
+- `card-buttons`
+- `card-badges`
+- `board-buttons`
+- `show-settings`
+- `authorization-status`
+- `show-authorization`
+
+API Key is configured in the admin with `https://sfrancisatx.github.io` as an allowed origin.
 
 ## Files
 
 - `manifest.json` - Power-Up configuration
-- `index.html` - Main entry point
-- `client.js` - Power-Up logic
-- `pinned-cards.html` - Popup to show all pinned cards
+- `index.html` - Main entry point (loads client.js)
+- `client.js` - Power-Up capability handlers and REST API logic
+- `authorize.html` - Authorization popup
+- `pinned-cards.html` - Board-button popup listing pinned cards
 - `settings.html` - Settings/help page
 
-## Limitations
+## Deployment
 
-- Trello's native filter will still hide cards even if they're pinned
-- The Power-Up cannot override Trello's built-in filtering behavior
-- Use the "Show Pinned Cards" board button to quickly access pinned cards when filters are active
+Hosted on GitHub Pages at `https://sfrancisatx.github.io/trello-pin-cards/`. Pushing to `main` auto-deploys via `.github/workflows/pages.yml`.
+
+Manifest URL: `https://sfrancisatx.github.io/trello-pin-cards/manifest.json`
+
+## Known Limitations
+
+- Cannot override Trello's native filter (API limitation). Use the "Pinned" label filter as a workaround.
+- Each user must authorize the Power-Up once to enable label sync. Users who haven't authorized can still pin cards (badge works) but the label won't be added for them.
+- If the API key in the admin is regenerated, all users must re-authorize.
