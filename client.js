@@ -30,18 +30,23 @@ function togglePinnedLabel(t, shouldPin) {
       }
       var apiKey = t.getRestApi().appKey;
       console.log('Managing label, apiKey:', apiKey, 'shouldPin:', shouldPin);
-      return t.card('id', 'idBoard', 'labels')
+      return t.card('id', 'idBoard')
         .then(function(card) {
           return ensurePinnedLabel(t, token, apiKey, card.idBoard)
             .then(function(label) {
-              var hasLabel = (card.labels || []).some(function(l) { return l.id === label.id; });
-              if (shouldPin && !hasLabel) {
-                return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels?value=' + label.id +
-                  '&key=' + apiKey + '&token=' + token, { method: 'POST' });
-              } else if (!shouldPin && hasLabel) {
-                return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels/' + label.id +
-                  '?key=' + apiKey + '&token=' + token, { method: 'DELETE' });
-              }
+              // Fetch current card labels via REST API
+              return fetch('https://api.trello.com/1/cards/' + card.id + '?fields=idLabels&key=' + apiKey + '&token=' + token)
+                .then(function(res) { return res.json(); })
+                .then(function(cardData) {
+                  var hasLabel = (cardData.idLabels || []).indexOf(label.id) !== -1;
+                  if (shouldPin && !hasLabel) {
+                    return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels?value=' + label.id +
+                      '&key=' + apiKey + '&token=' + token, { method: 'POST' });
+                  } else if (!shouldPin && hasLabel) {
+                    return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels/' + label.id +
+                      '?key=' + apiKey + '&token=' + token, { method: 'DELETE' });
+                  }
+                });
             });
         });
     })
