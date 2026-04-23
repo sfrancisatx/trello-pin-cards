@@ -21,7 +21,6 @@ function ensurePinnedLabel(t, token, apiKey, boardId) {
 
 // Add or remove the "Pinned" label on a card using pre-fetched card/token info
 function updateLabel(cardId, boardId, token, apiKey, shouldPin) {
-  console.log('updateLabel:', cardId, 'shouldPin:', shouldPin);
   return ensurePinnedLabel(null, token, apiKey, boardId)
     .then(function(label) {
       return fetch('https://api.trello.com/1/cards/' + cardId + '?fields=idLabels&key=' + apiKey + '&token=' + token)
@@ -72,7 +71,6 @@ TrelloPowerUp.initialize({
         callback: function(t) {
           var newState = !isPinned;
           var ctx = t.getContext();
-          console.log('Context:', ctx);
           var cardId = ctx.card;
           var boardId = ctx.board;
           var apiKey = t.getRestApi().appKey;
