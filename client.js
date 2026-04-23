@@ -71,25 +71,27 @@ TrelloPowerUp.initialize({
         text: isPinned ? '📌 Unpin Card' : '📌 Pin Card',
         callback: function(t) {
           var newState = !isPinned;
-          // Get card info BEFORE closing popup (t becomes invalid after close)
-          return t.card('id', 'idBoard')
-            .then(function(card) {
-              var token, apiKey = t.getRestApi().appKey;
-              return t.getRestApi().getToken()
-                .then(function(tok) { token = tok; })
-                .then(function() {
-                  return t.set('card', 'shared', PINNED_CARD_KEY, newState);
-                })
-                .then(function() {
-                  return t.closePopup();
-                })
-                .then(function() {
-                  // Fire-and-forget label update using captured card/token
-                  if (token) {
-                    updateLabel(card.id, card.idBoard, token, apiKey, newState)
-                      .catch(function(err) { console.error('Label update failed:', err); });
-                  }
-                });
+          var ctx = t.getContext();
+          console.log('Context:', ctx);
+          var cardId = ctx.card;
+          var boardId = ctx.board;
+          var apiKey = t.getRestApi().appKey;
+          var token;
+          return t.getRestApi().getToken()
+            .then(function(tok) { token = tok; })
+            .then(function() {
+              return t.set('card', 'shared', PINNED_CARD_KEY, newState);
+            })
+            .then(function() {
+              return t.closePopup();
+            })
+            .then(function() {
+              if (token && cardId && boardId) {
+                updateLabel(cardId, boardId, token, apiKey, newState)
+                  .catch(function(err) { console.error('Label update failed:', err); });
+              } else {
+                console.warn('Missing data for label update:', { token: !!token, cardId: cardId, boardId: boardId });
+              }
             });
         }
       }];
