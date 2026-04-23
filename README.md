@@ -41,11 +41,16 @@ A Trello Power-Up that allows you to pin cards so they remain visible even when 
 
 ## Usage
 
+> **Important - New Trello UI**: Power-Up buttons are now hidden in the new Trello layout!
+> - **Card buttons**: Click the **🚀 rocket icon** at the bottom of an open card
+> - **Board buttons**: Click the **🚀 rocket icon** at the top right of the board
+
 ### Pin a Card
 
 1. Open any card
-2. Click the "Pin Card" button in the card buttons section
-3. The card will now show a 📌 badge
+2. Click the 🚀 rocket icon at the bottom of the card to open the Power-Ups menu
+3. Click "📌 Pin Card"
+4. The card will now show a 📌 badge on the board view
 
 ### Unpin a Card
 
