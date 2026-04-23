@@ -28,8 +28,10 @@ TrelloPowerUp.initialize({
 
   // Add pin/unpin button to cards
   'card-buttons': function(t, options) {
+    console.log('card-buttons called');
     return t.get('card', 'shared', PINNED_CARD_KEY)
       .then(function(isPinned) {
+        console.log('card-buttons: isPinned =', isPinned);
         return [{
           icon: PIN_ICON,
           text: isPinned ? 'Unpin Card' : 'Pin Card',
@@ -42,6 +44,7 @@ TrelloPowerUp.initialize({
         }];
       })
       .catch(function() {
+        console.log('card-buttons: error caught');
         // Silently fail if session not available
         return [];
       });
@@ -49,6 +52,7 @@ TrelloPowerUp.initialize({
 
   // Add board button to show all pinned cards
   'board-buttons': function(t, options) {
+    console.log('board-buttons called');
     return [{
       icon: PIN_ICON,
       text: 'Show Pinned Cards',
