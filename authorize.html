@@ -28,7 +28,10 @@
   <button id="authorize">Authorize</button>
 
   <script>
-    var t = TrelloPowerUp.iframe();
+    var t = TrelloPowerUp.iframe({
+      appKey: 'd700a75532f7a75fa31df0f8b9433749',
+      appName: 'Pin Cards'
+    });
 
     document.getElementById('authorize').addEventListener('click', function() {
       t.getRestApi().authorize({

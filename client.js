@@ -74,6 +74,9 @@ function togglePinnedLabel(t, shouldPin) {
 }
 
 // Initialize the Power-Up
+var APP_KEY = 'd700a75532f7a75fa31df0f8b9433749';
+var APP_NAME = 'Pin Cards';
+
 TrelloPowerUp.initialize({
   // Add badge to pinned cards
   'card-badges': function(t, options) {
@@ -150,6 +153,9 @@ TrelloPowerUp.initialize({
       height: 140
     });
   }
+}, {
+  appKey: APP_KEY,
+  appName: APP_NAME
 });
 
 console.log('Pin Cards Power-Up loaded');
