@@ -19,6 +19,10 @@ TrelloPowerUp.initialize({
           }];
         }
         return [];
+      })
+      .catch(function(error) {
+        console.error('Error loading card badge:', error);
+        return [];
       });
   },
 
@@ -37,6 +41,10 @@ TrelloPowerUp.initialize({
               });
           }
         }];
+      })
+      .catch(function(error) {
+        console.error('Error loading card button:', error);
+        return [];
       });
   },
 
