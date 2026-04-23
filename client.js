@@ -33,7 +33,6 @@ TrelloPowerUp.initialize({
       .then(function(isPinned) {
         console.log('card-buttons: isPinned =', isPinned);
         return [{
-          icon: PIN_ICON,
           text: isPinned ? 'Unpin Card' : 'Pin Card',
           callback: function(t) {
             return t.set('card', 'shared', PINNED_CARD_KEY, !isPinned)
@@ -54,7 +53,6 @@ TrelloPowerUp.initialize({
   'board-buttons': function(t, options) {
     console.log('board-buttons called');
     return [{
-      icon: PIN_ICON,
       text: 'Show Pinned Cards',
       callback: function(t) {
         return t.popup({
