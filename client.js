@@ -19,39 +19,23 @@ function ensurePinnedLabel(t, token, apiKey, boardId) {
     });
 }
 
-// Add or remove the "Pinned" label on a card
-function togglePinnedLabel(t, shouldPin) {
-  return t.getRestApi().getToken()
-    .catch(function() { return null; })
-    .then(function(token) {
-      if (!token) {
-        console.warn('No token available');
-        return;
-      }
-      var apiKey = t.getRestApi().appKey;
-      console.log('Managing label, apiKey:', apiKey, 'shouldPin:', shouldPin);
-      return t.card('id', 'idBoard')
-        .then(function(card) {
-          return ensurePinnedLabel(t, token, apiKey, card.idBoard)
-            .then(function(label) {
-              // Fetch current card labels via REST API
-              return fetch('https://api.trello.com/1/cards/' + card.id + '?fields=idLabels&key=' + apiKey + '&token=' + token)
-                .then(function(res) { return res.json(); })
-                .then(function(cardData) {
-                  var hasLabel = (cardData.idLabels || []).indexOf(label.id) !== -1;
-                  if (shouldPin && !hasLabel) {
-                    return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels?value=' + label.id +
-                      '&key=' + apiKey + '&token=' + token, { method: 'POST' });
-                  } else if (!shouldPin && hasLabel) {
-                    return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels/' + label.id +
-                      '?key=' + apiKey + '&token=' + token, { method: 'DELETE' });
-                  }
-                });
-            });
+// Add or remove the "Pinned" label on a card using pre-fetched card/token info
+function updateLabel(cardId, boardId, token, apiKey, shouldPin) {
+  console.log('updateLabel:', cardId, 'shouldPin:', shouldPin);
+  return ensurePinnedLabel(null, token, apiKey, boardId)
+    .then(function(label) {
+      return fetch('https://api.trello.com/1/cards/' + cardId + '?fields=idLabels&key=' + apiKey + '&token=' + token)
+        .then(function(res) { return res.json(); })
+        .then(function(cardData) {
+          var hasLabel = (cardData.idLabels || []).indexOf(label.id) !== -1;
+          if (shouldPin && !hasLabel) {
+            return fetch('https://api.trello.com/1/cards/' + cardId + '/idLabels?value=' + label.id +
+              '&key=' + apiKey + '&token=' + token, { method: 'POST' });
+          } else if (!shouldPin && hasLabel) {
+            return fetch('https://api.trello.com/1/cards/' + cardId + '/idLabels/' + label.id +
+              '?key=' + apiKey + '&token=' + token, { method: 'DELETE' });
+          }
         });
-    })
-    .catch(function(err) {
-      console.error('Failed to toggle pinned label:', err);
     });
 }
 
@@ -87,14 +71,26 @@ TrelloPowerUp.initialize({
         text: isPinned ? '📌 Unpin Card' : '📌 Pin Card',
         callback: function(t) {
           var newState = !isPinned;
-          t.set('card', 'shared', PINNED_CARD_KEY, newState)
-            .then(function() {
-              return togglePinnedLabel(t, newState);
-            })
-            .catch(function(err) {
-              console.error('Background update failed:', err);
+          // Get card info BEFORE closing popup (t becomes invalid after close)
+          return t.card('id', 'idBoard')
+            .then(function(card) {
+              var token, apiKey = t.getRestApi().appKey;
+              return t.getRestApi().getToken()
+                .then(function(tok) { token = tok; })
+                .then(function() {
+                  return t.set('card', 'shared', PINNED_CARD_KEY, newState);
+                })
+                .then(function() {
+                  return t.closePopup();
+                })
+                .then(function() {
+                  // Fire-and-forget label update using captured card/token
+                  if (token) {
+                    updateLabel(card.id, card.idBoard, token, apiKey, newState)
+                      .catch(function(err) { console.error('Label update failed:', err); });
+                  }
+                });
             });
-          return t.closePopup();
         }
       }];
       if (!isAuthorized) {
