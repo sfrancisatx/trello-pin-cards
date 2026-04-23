@@ -19,33 +19,10 @@ function ensurePinnedLabel(t, token, apiKey, boardId) {
     });
 }
 
-// Ensure the Power-Up is authorized, prompt if not
-function ensureAuthorized(t) {
-  return t.getRestApi().isAuthorized()
-    .then(function(isAuthorized) {
-      if (isAuthorized) return true;
-      console.log('Not authorized, prompting user...');
-      return t.getRestApi().authorize({
-        scope: 'read,write',
-        expiration: 'never'
-      }).then(function() { return true; })
-        .catch(function(err) {
-          console.error('Authorization failed:', err);
-          return false;
-        });
-    });
-}
-
 // Add or remove the "Pinned" label on a card
 function togglePinnedLabel(t, shouldPin) {
-  return ensureAuthorized(t)
-    .then(function(authorized) {
-      if (!authorized) {
-        console.warn('User did not authorize - skipping label update');
-        return;
-      }
-      return t.getRestApi().getToken();
-    })
+  return t.getRestApi().getToken()
+    .catch(function() { return null; })
     .then(function(token) {
       if (!token) {
         console.warn('No token available');
@@ -101,13 +78,16 @@ TrelloPowerUp.initialize({
           text: isPinned ? '📌 Unpin Card' : '📌 Pin Card',
           callback: function(t) {
             var newState = !isPinned;
-            return t.set('card', 'shared', PINNED_CARD_KEY, newState)
+            // Fire and forget label update - don't block popup close
+            t.set('card', 'shared', PINNED_CARD_KEY, newState)
               .then(function() {
                 return togglePinnedLabel(t, newState);
               })
-              .then(function() {
-                return t.closePopup();
+              .catch(function(err) {
+                console.error('Background update failed:', err);
               });
+            // Close popup immediately
+            return t.closePopup();
           }
         }];
       })
@@ -134,6 +114,23 @@ TrelloPowerUp.initialize({
       title: 'Pin Cards Settings',
       url: './settings.html',
       height: 184
+    });
+  },
+
+  // Tells Trello if the user has authorized the Power-Up
+  'authorization-status': function(t, options) {
+    return t.getRestApi().isAuthorized()
+      .then(function(isAuthorized) {
+        return { authorized: isAuthorized };
+      });
+  },
+
+  // Shown when user clicks "Authorize Account" in the Power-Up menu
+  'show-authorization': function(t, options) {
+    return t.popup({
+      title: 'Authorize Pin Cards',
+      url: './authorize.html',
+      height: 140
     });
   }
 }, {
