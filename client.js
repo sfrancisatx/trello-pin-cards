@@ -28,7 +28,7 @@ TrelloPowerUp.initialize({
 
   // Add pin/unpin button to cards
   'card-buttons': function(t, options) {
-    return t.get('card', 'shared', PINNED_CARD_KEY)
+    return t.get('card', 'shared', PINNED_CARD_KEY, false)
       .then(function(isPinned) {
         return [{
           icon: PIN_ICON,
