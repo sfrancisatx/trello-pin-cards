@@ -72,26 +72,40 @@ TrelloPowerUp.initialize({
 
   // Add pin/unpin button to cards
   'card-buttons': function(t, options) {
-    return t.get('card', 'shared', PINNED_CARD_KEY)
-      .then(function(isPinned) {
-        return [{
-          text: isPinned ? '📌 Unpin Card' : '📌 Pin Card',
+    return Promise.all([
+      t.get('card', 'shared', PINNED_CARD_KEY),
+      t.getRestApi().isAuthorized().catch(function() { return false; })
+    ]).then(function(results) {
+      var isPinned = results[0];
+      var isAuthorized = results[1];
+      var buttons = [{
+        text: isPinned ? '📌 Unpin Card' : '📌 Pin Card',
+        callback: function(t) {
+          var newState = !isPinned;
+          t.set('card', 'shared', PINNED_CARD_KEY, newState)
+            .then(function() {
+              return togglePinnedLabel(t, newState);
+            })
+            .catch(function(err) {
+              console.error('Background update failed:', err);
+            });
+          return t.closePopup();
+        }
+      }];
+      if (!isAuthorized) {
+        buttons.push({
+          text: '🔑 Authorize Pin Cards',
           callback: function(t) {
-            var newState = !isPinned;
-            // Fire and forget label update - don't block popup close
-            t.set('card', 'shared', PINNED_CARD_KEY, newState)
-              .then(function() {
-                return togglePinnedLabel(t, newState);
-              })
-              .catch(function(err) {
-                console.error('Background update failed:', err);
-              });
-            // Close popup immediately
-            return t.closePopup();
+            return t.popup({
+              title: 'Authorize Pin Cards',
+              url: './authorize.html',
+              height: 140
+            });
           }
-        }];
-      })
-      .catch(function() { return []; });
+        });
+      }
+      return buttons;
+    }).catch(function() { return []; });
   },
 
   // Add board button to show all pinned cards
