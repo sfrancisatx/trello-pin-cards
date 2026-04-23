@@ -30,11 +30,11 @@ function togglePinnedLabel(t, shouldPin) {
       }
       var apiKey = t.getRestApi().appKey;
       console.log('Managing label, apiKey:', apiKey, 'shouldPin:', shouldPin);
-      return t.card('id', 'idBoard', 'idLabels')
+      return t.card('id', 'idBoard', 'labels')
         .then(function(card) {
           return ensurePinnedLabel(t, token, apiKey, card.idBoard)
             .then(function(label) {
-              var hasLabel = card.idLabels.indexOf(label.id) !== -1;
+              var hasLabel = (card.labels || []).some(function(l) { return l.id === label.id; });
               if (shouldPin && !hasLabel) {
                 return fetch('https://api.trello.com/1/cards/' + card.id + '/idLabels?value=' + label.id +
                   '&key=' + apiKey + '&token=' + token, { method: 'POST' });
