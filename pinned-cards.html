@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      padding: 10px;
+      margin: 0;
+    }
+    .pinned-card {
+      padding: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid #e74c3c;
+      background: #f8f9fa;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .pinned-card:hover {
+      background: #e9ecef;
+    }
+    .card-name {
+      font-weight: 500;
+      color: #172b4d;
+    }
+    .card-list {
+      font-size: 12px;
+      color: #5e6c84;
+      margin-top: 4px;
+    }
+    .no-cards {
+      text-align: center;
+      color: #5e6c84;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <div class="no-cards">Loading pinned cards...</div>
+  </div>
+
+  <script>
+    var t = TrelloPowerUp.iframe();
+    var PINNED_CARD_KEY = 'pinned';
+
+    // Get all cards on the board
+    t.board('all')
+      .then(function(board) {
+        return t.cards('all');
+      })
+      .then(function(cards) {
+        // Check each card for pinned status
+        var pinnedCardPromises = cards.map(function(card) {
+          return t.get(card.id, 'shared', PINNED_CARD_KEY)
+            .then(function(isPinned) {
+              if (isPinned) {
+                return card;
+              }
+              return null;
+            });
+        });
+
+        return Promise.all(pinnedCardPromises);
+      })
+      .then(function(results) {
+        var pinnedCards = results.filter(function(card) {
+          return card !== null;
+        });
+
+        var content = document.getElementById('content');
+        
+        if (pinnedCards.length === 0) {
+          content.innerHTML = '<div class="no-cards">No pinned cards found</div>';
+        } else {
+          content.innerHTML = '';
+          pinnedCards.forEach(function(card) {
+            var cardEl = document.createElement('div');
+            cardEl.className = 'pinned-card';
+            cardEl.innerHTML = 
+              '<div class="card-name">📌 ' + card.name + '</div>' +
+              '<div class="card-list">List: ' + (card.list ? card.list.name : 'Unknown') + '</div>';
+            
+            cardEl.addEventListener('click', function() {
+              t.showCard(card.id);
+            });
+            
+            content.appendChild(cardEl);
+          });
+        }
+
+        t.sizeTo('#content');
+      })
+      .catch(function(error) {
+        console.error('Error loading pinned cards:', error);
+        document.getElementById('content').innerHTML = 
+          '<div class="no-cards">Error loading pinned cards</div>';
+      });
+  </script>
+</body>
+</html>

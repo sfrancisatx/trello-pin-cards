@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      padding: 15px;
+      margin: 0;
+    }
+    h3 {
+      margin-top: 0;
+      color: #172b4d;
+      font-size: 14px;
+    }
+    p {
+      color: #5e6c84;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .info {
+      background: #f4f5f7;
+      padding: 10px;
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h3>Pin Cards Power-Up</h3>
+  <p>This Power-Up allows you to pin cards so they remain visible even when filters are applied.</p>
+  
+  <div class="info">
+    <strong>How to use:</strong>
+    <ul style="margin: 8px 0; padding-left: 20px;">
+      <li>Click the "Pin Card" button on any card</li>
+      <li>Pinned cards show a 📌 badge</li>
+      <li>Use the board button to see all pinned cards</li>
+    </ul>
+  </div>
+
+  <script>
+    var t = TrelloPowerUp.iframe();
+    t.render(function() {
+      t.sizeTo('body');
+    });
+  </script>
+</body>
+</html>

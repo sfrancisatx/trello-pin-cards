@@ -1,0 +1,19 @@
+{
+  "name": "Pin Cards",
+  "details": "Pin cards to keep them visible even when filtering",
+  "icon": {
+    "url": "./icon.png"
+  },
+  "author": "Strong Events",
+  "capabilities": [
+    "card-badges",
+    "card-buttons",
+    "board-buttons",
+    "show-settings"
+  ],
+  "connectors": {
+    "iframe": {
+      "url": "./index.html"
+    }
+  }
+}
