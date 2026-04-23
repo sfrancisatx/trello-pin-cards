@@ -19,15 +19,40 @@ function ensurePinnedLabel(t, token, apiKey, boardId) {
     });
 }
 
+// Ensure the Power-Up is authorized, prompt if not
+function ensureAuthorized(t) {
+  return t.getRestApi().isAuthorized()
+    .then(function(isAuthorized) {
+      if (isAuthorized) return true;
+      console.log('Not authorized, prompting user...');
+      return t.getRestApi().authorize({
+        scope: 'read,write',
+        expiration: 'never'
+      }).then(function() { return true; })
+        .catch(function(err) {
+          console.error('Authorization failed:', err);
+          return false;
+        });
+    });
+}
+
 // Add or remove the "Pinned" label on a card
 function togglePinnedLabel(t, shouldPin) {
-  return t.getRestApi().getToken()
+  return ensureAuthorized(t)
+    .then(function(authorized) {
+      if (!authorized) {
+        console.warn('User did not authorize - skipping label update');
+        return;
+      }
+      return t.getRestApi().getToken();
+    })
     .then(function(token) {
       if (!token) {
-        console.warn('No Trello API token - cannot manage labels');
+        console.warn('No token available');
         return;
       }
       var apiKey = t.getRestApi().appKey;
+      console.log('Managing label, apiKey:', apiKey, 'shouldPin:', shouldPin);
       return t.card('id', 'idBoard', 'idLabels')
         .then(function(card) {
           return ensurePinnedLabel(t, token, apiKey, card.idBoard)
