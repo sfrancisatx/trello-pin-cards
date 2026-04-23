@@ -1,9 +1,6 @@
 {
   "name": "Pin Cards",
   "details": "Pin cards to keep them visible even when filtering",
-  "icon": {
-    "url": "./icon.png"
-  },
   "author": "Strong Events",
   "capabilities": [
     "card-badges",
